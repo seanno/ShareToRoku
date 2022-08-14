@@ -1,0 +1,9 @@
+<resources>
+    <string name="app_name">Share To Roku</string>
+    <string name="choose_roku_title">Choose Roku</string>
+    <string name="send_success">Sent to Roku!</string>
+    <string name="send_failure_search">Failed sending search to Roku</string>
+    <string name="send_failure_cmd">Failed sending command to Roku</string>
+    <string name="send_failure_launch">Failed sending launch to Roku</string>
+    <string name="channels_failure">Failed fetching Roku channels</string>
+</resources>
