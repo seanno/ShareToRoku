@@ -9,8 +9,8 @@ android {
         applicationId "com.shutdownhook.shraetoroku"
         minSdk 26
         targetSdk 32
-        versionCode 2022081301
-        versionName "Beta1"
+        versionCode 2022081701
+        versionName "Beta2"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }

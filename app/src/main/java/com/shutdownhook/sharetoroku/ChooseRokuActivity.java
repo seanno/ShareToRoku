@@ -5,10 +5,12 @@ import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.text.method.LinkMovementMethod;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
+import android.widget.TextView;
 
 import java.util.Comparator;
 import java.util.Set;
@@ -49,6 +51,9 @@ public class ChooseRokuActivity extends AppCompatActivity {
                findRokus();
            }
         });
+
+        ((TextView)findViewById(R.id.privacyLink))
+                .setMovementMethod(LinkMovementMethod.getInstance());
 
         initializeRokus();
         onNewIntent(getIntent());
