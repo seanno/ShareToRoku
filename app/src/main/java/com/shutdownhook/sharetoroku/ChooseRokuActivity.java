@@ -40,7 +40,13 @@ public class ChooseRokuActivity extends AppCompatActivity {
         list.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> a, View v, int position, long args) {
-                shareToRoku((Roku.RokuInfo) a.getItemAtPosition(position));
+                Roku.RokuInfo roku = (Roku.RokuInfo) a.getItemAtPosition(position);
+                if (roku.Url == null) {
+                    enableSpinner(true);
+                    findRokus();
+                } else {
+                    shareToRoku(roku);
+                }
             }
         });
 
@@ -129,19 +135,30 @@ public class ChooseRokuActivity extends AppCompatActivity {
     private void populateRokus(Set<Roku.RokuInfo> rokus) {
         log.i("populating %d rokus", rokus.size());
         rokuAdapter.clear();
-        rokuAdapter.addAll(rokus);
 
-        rokuAdapter.sort(new Comparator<Roku.RokuInfo>() {
-            @Override
-            public int compare(Roku.RokuInfo info1, Roku.RokuInfo info2) {
-                if (info1 == info2) return(0);
-                if (info1 == null) return(-1);
-                if (info2 == null) return(1);
-                int cmp = info1.Name.compareTo(info2.Name);
-                if (cmp == 0) cmp = info1.Url.compareTo(info2.Url);
-                return(cmp);
-            }
-        });
+        if (rokus.size() == 0) {
+
+            Roku.RokuInfo emptyInfo = new Roku.RokuInfo();
+            emptyInfo.Name = getApplicationContext().getResources().getString(R.string.no_rokus);
+            emptyInfo.Url = null; // redundant, just making clear this is a marker
+            rokuAdapter.add(emptyInfo);
+        }
+        else {
+
+            rokuAdapter.addAll(rokus);
+
+            rokuAdapter.sort(new Comparator<Roku.RokuInfo>() {
+                @Override
+                public int compare(Roku.RokuInfo info1, Roku.RokuInfo info2) {
+                    if (info1 == info2) return (0);
+                    if (info1 == null) return (-1);
+                    if (info2 == null) return (1);
+                    int cmp = info1.Name.compareTo(info2.Name);
+                    if (cmp == 0) cmp = info1.Url.compareTo(info2.Url);
+                    return (cmp);
+                }
+            });
+        }
 
         rokuAdapter.notifyDataSetChanged();
         enableSpinner(false);

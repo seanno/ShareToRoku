@@ -7,4 +7,5 @@
     <string name="send_failure_launch">Failed sending launch to Roku</string>
     <string name="channels_failure">Failed fetching Roku channels</string>
     <string name="privacy_link"><a href='https://shutdownhook.com/share-to-roku-privacy-and-information/'>privacy and app info</a></string>
+    <string name="no_rokus">\nNo Rokus found!\n\nEnsure that wifi and your Roku\nare both turned on\n\nSwipe down to search again\n</string>
 </resources>
