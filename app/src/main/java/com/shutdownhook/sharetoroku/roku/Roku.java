@@ -41,7 +41,9 @@ public class Roku {
         Home,
         Select,
         Backspace,
-        PowerOn
+        PowerOn,
+        Rev,
+        Fwd
     }
 
     public static void sendCmd(String baseUrl, Cmd cmd, CmdResult handler) {
@@ -53,6 +55,41 @@ public class Roku {
             @Override public void error(Exception e) {
                 if (handler != null) handler.error(e);
             }
+        });
+    }
+
+    public static void sendString(String baseUrl, String str, CmdResult handler) {
+
+        if (str == null) return;
+
+        // this works because we know that calls will all come back
+        // on the ux thread rather than on multiple random threads
+
+        new CmdResult() {
+
+            int ich = 0;
+
+            @Override public void success() {
+                if (ich == str.length()) { if (handler != null) handler.success(); }
+                else { sendCharacter(baseUrl, str.charAt(ich++), this); }
+            }
+
+            @Override public void error(Exception e) {
+                if (handler != null) handler.error(e);
+            }
+
+            public void start() {
+                success();
+            }
+
+        }.start();
+    }
+
+    public static void sendCharacter(String baseUrl, Character ch, CmdResult handler) {
+        String url = baseUrl + "/keypress/Lit_" + Http.urlEncode(ch.toString());
+        http.post(url, new Http.StringHandler() {
+            @Override public void success(String s) { if (handler != null) handler.success(); }
+            @Override public void error(Exception e) { if (handler != null) handler.error(e); }
         });
     }
 
@@ -131,8 +168,8 @@ public class Roku {
                        if (info1 == null) return(-1);
                        if (info2 == null) return(1);
 
-                       int cmp = info1.Name.compareTo(info2.Name);
-                       if (cmp == 0) cmp = info1.ProviderId.compareTo(info2.ProviderId);
+                       int cmp = info1.Name.compareToIgnoreCase(info2.Name);
+                       if (cmp == 0) cmp = info1.ProviderId.compareToIgnoreCase(info2.ProviderId);
                        return(cmp);
                    }
                 });

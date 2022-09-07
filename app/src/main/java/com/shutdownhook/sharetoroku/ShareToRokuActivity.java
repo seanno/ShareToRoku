@@ -7,12 +7,10 @@ import android.os.Bundle;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
-import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.Toast;
 
-import com.shutdownhook.sharetoroku.R;
 import com.shutdownhook.sharetoroku.roku.Roku;
 import com.shutdownhook.sharetoroku.util.Loggy;
 
@@ -28,21 +26,13 @@ public class ShareToRokuActivity extends AppCompatActivity {
 
         onNewIntent(getIntent());
 
-        ((Button)findViewById(R.id.searchButton)).setOnClickListener(new View.OnClickListener() {
-            @Override public void onClick(View v) { doSearch(false); }
-        });
-
-        ((Button)findViewById(R.id.backButton)).setOnClickListener(new View.OnClickListener() {
-            @Override public void onClick(View v) { doCommand(Roku.Cmd.Back); }
-        });
-
-        ((Button)findViewById(R.id.homeButton)).setOnClickListener(new View.OnClickListener() {
-            @Override public void onClick(View v) { doCommand(Roku.Cmd.Home); }
-        });
-
-        ((Button)findViewById(R.id.playButton)).setOnClickListener(new View.OnClickListener() {
-            @Override public void onClick(View v) { doCommand(Roku.Cmd.Play); }
-        });
+        findViewById(R.id.searchButton).setOnClickListener(v -> doSearch(false));
+        findViewById(R.id.keysButton).setOnClickListener(v -> doKeys());
+        findViewById(R.id.backButton).setOnClickListener(v -> doCommand(Roku.Cmd.Back));
+        findViewById(R.id.homeButton).setOnClickListener(v -> doCommand(Roku.Cmd.Home));
+        findViewById(R.id.playButton).setOnClickListener(v -> doCommand(Roku.Cmd.Play));
+        findViewById(R.id.rewindButton).setOnClickListener(v -> doCommand(Roku.Cmd.Rev));
+        findViewById(R.id.forwardButton).setOnClickListener(v -> doCommand(Roku.Cmd.Fwd));
 
         ((CirclePad)findViewById(R.id.circlePad)).setListener(new CirclePad.Listener() {
             @Override public void onDirectional(CirclePad.Direction direction) {
@@ -64,7 +54,7 @@ public class ShareToRokuActivity extends AppCompatActivity {
         channelAdapter = new ArrayAdapter<String>(this,
                 R.layout.centered_text_item_layout);
 
-        ListView list = (ListView) findViewById(R.id.channelList);
+        ListView list = findViewById(R.id.channelList);
         list.setAdapter(channelAdapter);
         list.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
@@ -82,7 +72,7 @@ public class ShareToRokuActivity extends AppCompatActivity {
 
         rokuName = getIntent().getStringExtra(ChooseRokuActivity.EXTRA_ROKU_NAME);
         rokuUrl = getIntent().getStringExtra(ChooseRokuActivity.EXTRA_ROKU_URL);
-        getSupportActionBar().setTitle(rokuName);
+        getSupportActionBar().setTitle(rokuName == null ? "" : rokuName);
 
         String inboundSearch = intent.getStringExtra(ChooseRokuActivity.EXTRA_INBOUND_SEARCH);
         inboundSearch = (inboundSearch == null ? "" : Roku.sanitizeSearchString(inboundSearch));
@@ -112,6 +102,18 @@ public class ShareToRokuActivity extends AppCompatActivity {
                String msg = getString(R.string.send_failure_search) + " (" + e.toString() + ")";
                log.e(msg); // toasty(msg);
            }
+        });
+    }
+
+    private void doKeys() {
+        String s = ((EditText)findViewById(R.id.searchText)).getText().toString();
+        Roku.sendString(rokuUrl, s, new Roku.CmdResult() {
+            @Override public void success() { log.i("send string: %s", s); }
+            @Override public void error(Exception e) {
+                String msg = "Failed sending string to Roku" +
+                        " " + s + " (" + e.toString() + ")";
+                log.e(msg); // toasty(msg);
+            }
         });
     }
 

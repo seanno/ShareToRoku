@@ -9,7 +9,7 @@
 
     <EditText
         android:id="@+id/searchText"
-        android:layout_width="wrap_content"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginStart="16dp"
         android:layout_marginTop="16dp"
@@ -17,18 +17,33 @@
         android:minHeight="48dp"
         android:text="searchText"
         app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toStartOf="@+id/searchButton"
         app:layout_constraintTop_toTopOf="parent" />
 
-    <Button
+    <ImageButton
         android:id="@+id/searchButton"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:src="@drawable/ic_baseline_search_24"
+        android:background="@drawable/round_button"
+        app:tint="@color/white"
+        android:layout_width="56dp"
+        android:layout_height="56dp"
         android:layout_marginStart="16dp"
+        app:layout_constraintStart_toEndOf="@+id/searchText"
+        app:layout_constraintEnd_toStartOf="@+id/keysButton"
+        app:layout_constraintTop_toTopOf="@+id/searchText" />
+
+    <ImageButton
+        android:id="@+id/keysButton"
+        android:src="@drawable/ic_baseline_keyboard_24"
+        android:background="@drawable/round_button"
+        app:tint="@color/white"
+        android:layout_width="56dp"
+        android:layout_height="56dp"
+        android:layout_marginStart="12dp"
         android:layout_marginEnd="16dp"
-        android:text="search"
-        app:layout_constraintBaseline_toBaselineOf="@+id/searchText"
+        app:layout_constraintTop_toTopOf="@+id/searchText"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toEndOf="@+id/searchText" />
+        app:layout_constraintStart_toEndOf="@+id/searchButton"/>
 
     <com.shutdownhook.sharetoroku.CirclePad
         android:id="@+id/circlePad"
@@ -41,36 +56,67 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/homeButton" />
 
-    <Button
-        android:id="@+id/backButton"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Back"
-        app:layout_constraintBaseline_toBaselineOf="@+id/homeButton"
-        app:layout_constraintEnd_toStartOf="@+id/homeButton"
-        app:layout_constraintHorizontal_bias="0.5"
-        app:layout_constraintStart_toStartOf="parent" />
-
-    <Button
-        android:id="@+id/homeButton"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+    <ImageButton
+        android:id="@+id/rewindButton"
+        android:src="@drawable/ic_baseline_fast_rewind_24"
+        android:background="@drawable/round_button"
+        app:tint="@color/white"
+        android:layout_width="56dp"
+        android:layout_height="56dp"
         android:layout_marginTop="32dp"
-        android:text="Home"
+        app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toStartOf="@+id/playButton"
-        app:layout_constraintHorizontal_bias="0.5"
-        app:layout_constraintStart_toEndOf="@+id/backButton"
-        app:layout_constraintTop_toBottomOf="@+id/searchText" />
+        app:layout_constraintTop_toBottomOf="@+id/searchText"
+        app:layout_constraintHorizontal_bias="0.5" />
 
-    <Button
+    <ImageButton
         android:id="@+id/playButton"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Play / Pause"
-        app:layout_constraintBaseline_toBaselineOf="@+id/homeButton"
+        android:src="@drawable/ic_baseline_play_arrow_24"
+        android:background="@drawable/round_button"
+        app:tint="@color/white"
+        android:layout_width="56dp"
+        android:layout_height="56dp"
+        app:layout_constraintStart_toEndOf="@+id/rewindButton"
+        app:layout_constraintEnd_toStartOf="@+id/forwardButton"
+        app:layout_constraintTop_toTopOf="@+id/rewindButton"
+        app:layout_constraintHorizontal_bias="0.5" />
+
+    <ImageButton
+        android:id="@+id/forwardButton"
+        android:src="@drawable/ic_baseline_fast_forward_24"
+        android:background="@drawable/round_button"
+        app:tint="@color/white"
+        android:layout_width="56dp"
+        android:layout_height="56dp"
+        app:layout_constraintStart_toEndOf="@+id/playButton"
+        app:layout_constraintEnd_toStartOf="@+id/backButton"
+        app:layout_constraintTop_toTopOf="@+id/rewindButton"
+        app:layout_constraintHorizontal_bias="0.5" />
+
+    <ImageButton
+        android:id="@+id/backButton"
+        android:src="@drawable/ic_baseline_arrow_back_24"
+        android:background="@drawable/round_button"
+        app:tint="@color/white"
+        android:layout_width="56dp"
+        android:layout_height="56dp"
+        app:layout_constraintStart_toEndOf="@+id/forwardButton"
+        app:layout_constraintEnd_toStartOf="@+id/homeButton"
+        app:layout_constraintTop_toTopOf="@+id/rewindButton"
+        app:layout_constraintHorizontal_bias="0.5" />
+
+    <ImageButton
+        android:id="@+id/homeButton"
+        android:src="@drawable/ic_baseline_home_24"
+        android:background="@drawable/round_button"
+        app:tint="@color/white"
+        android:layout_width="56dp"
+        android:layout_height="56dp"
+        app:layout_constraintStart_toEndOf="@+id/backButton"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.5"
-        app:layout_constraintStart_toEndOf="@+id/homeButton" />
+        app:layout_constraintTop_toTopOf="@+id/rewindButton"
+        app:layout_constraintHorizontal_bias="0.5" />
+
 
     <ListView
         android:id="@+id/channelList"
