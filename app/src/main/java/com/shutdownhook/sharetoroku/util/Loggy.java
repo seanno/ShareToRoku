@@ -2,7 +2,6 @@ package com.shutdownhook.sharetoroku.util;
 
 /* RELEASE */
 
-/*
 public class Loggy {
     public Loggy(String tag) { }
     public String e(String format, Object... args) { return(""); }
@@ -10,10 +9,10 @@ public class Loggy {
     public String i(String format, Object... args) { return(""); }
     public String d(String format, Object... args) { return(""); }
 }
-*/
 
 /* DEVELOPMENT */
 
+/*
 import android.util.Log;
 
 public class Loggy {
@@ -48,3 +47,4 @@ public class Loggy {
 
     private String tag;
 }
+*/

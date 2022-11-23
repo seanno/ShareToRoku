@@ -43,7 +43,9 @@ public class Roku {
         Backspace,
         PowerOn,
         Rev,
-        Fwd
+        Fwd,
+        VolumeUp,
+        VolumeDown
     }
 
     public static void sendCmd(String baseUrl, Cmd cmd, CmdResult handler) {
@@ -91,38 +93,6 @@ public class Roku {
             @Override public void success(String s) { if (handler != null) handler.success(); }
             @Override public void error(Exception e) { if (handler != null) handler.error(e); }
         });
-    }
-
-    // +----------------------+
-    // | sanitizeSearchString |
-    // +----------------------+
-
-    public static String sanitizeSearchString(String input) {
-        String clean = input.trim();
-        clean = cleanupForChrome(clean);
-        clean = cleanupForTvTime(clean);
-        return(clean);
-    }
-
-    private static String cleanupForChrome(String input) {
-
-        // chrome puts selected text in quotes and then follows it with the url
-        if (input.startsWith("\"")) {
-            int ichSecondQuote = input.indexOf("\"", 1);
-            if (ichSecondQuote != -1) {
-                return(input.substring(1, ichSecondQuote));
-            }
-        }
-
-        return(input);
-    }
-
-    private static String cleanupForTvTime(String input) {
-
-        // look for text before " on TV Time" --- only useful sharing from
-        // the show page though. this is all just the worst.
-        int ichTarget = input.indexOf(" on TV Time");
-        return(ichTarget == -1 ? input : input.substring(0, ichTarget));
     }
 
     // +-------------+
@@ -194,67 +164,78 @@ public class Roku {
     // | sendSearch |
     // +------------+
 
-    public static void sendSearch(String baseUrl, String searchString, CmdResult handler) {
+    public static void sendSearch(String baseUrl,
+                                  SearchParser.ParsedResult parsedResult,
+                                  CmdResult handler) {
 
-        String url = getSearchUrl(baseUrl, searchString);
+        if (parsedResult.Channel != null && parsedResult.ContentId != null) {
 
-        http.post(url, new Http.StringHandler() {
+            sendDeepLink(baseUrl,
+                    parsedResult.Channel,
+                    parsedResult.ContentId,
+                    parsedResult.MediaType,
+                    handler);
+
+            return;
+        }
+
+        StringBuilder sb = new StringBuilder();
+        sb.append(baseUrl).append("search/browse");
+
+        String search = (parsedResult.Search == null ? "" : Http.urlEncode(parsedResult.Search));
+
+        sb.append("?keyword=").append(search);
+
+        if (parsedResult.Channel != null || parsedResult.Season != null) {
+            sb.append("&launch=true&title=").append(search);
+        }
+
+        if (parsedResult.Channel != null) {
+            sb.append("&provider-id=").append(Http.urlEncode(parsedResult.Channel));
+        }
+
+        if (parsedResult.Season != null) {
+            sb.append("&type=tv-show&season=").append(Http.urlEncode(parsedResult.Season));
+        }
+
+        String searchUrl = sb.toString();
+        log.i("Search URL = %s", searchUrl);
+
+        http.post(searchUrl, new Http.StringHandler() {
             @Override public void success(String s) { handler.success(); }
             @Override public void error(Exception e) { handler.error(e); }
         });
     }
 
-    public static class ParsedSearch {
-        public String Keyword;
-        public String Title;
-        public Integer Season;
-        public Integer ProviderId;
-    }
+    // +--------------+
+    // | sendDeepLink |
+    // +--------------+
 
-    private static String getSearchUrl(String baseUrl, String searchString) {
+    public static void sendDeepLink(String baseUrl, String channel,
+                                    String contentId, String mediaType,
+                                    CmdResult handler) {
 
         StringBuilder sb = new StringBuilder();
-        sb.append(baseUrl).append("search/browse?launch=true&match-any=true");
 
-        ParsedSearch parsed = new ParsedSearch();
-        parsed.Keyword = searchString.trim();
-        checkForTitlePatterns(parsed);
+        sb.append(baseUrl)
+                .append("launch/")
+                .append(Http.urlEncode(channel))
+                .append("?contentId=")
+                .append(Http.urlEncode(contentId));
 
-        if (parsed.Title == null) {
-            sb.append("&keyword=").append(Http.urlEncode(parsed.Keyword));
-        }
-        else {
-            sb.append("&title=").append(Http.urlEncode(parsed.Title));
+        if (mediaType != null) {
+            sb.append("&mediaType=").append(Http.urlEncode(mediaType));
         }
 
-        if (parsed.ProviderId != null) {
-            sb.append("&provider-id=").append(Integer.toString(parsed.ProviderId));
-        }
+        String url = sb.toString();
+        log.i("DeepLink URL = %s", url);
 
-        if (parsed.Season != null) {
-            sb.append("&season=").append(Integer.toString(parsed.Season));
-        }
+        http.post(url, new Http.StringHandler() {
+            @Override public void success(String s) { handler.success(); }
+            @Override public void error(Exception e) { handler.error(e); }
+        });
 
-        return(sb.toString());
     }
-
-    private static void checkForTitlePatterns(ParsedSearch parsed) {
-        for (Pattern p : titlePatterns) {
-            Matcher m = p.matcher(parsed.Keyword);
-            if (m.matches()) {
-                parsed.Keyword = null;
-                parsed.Title = m.group(1);
-                parsed.Season = Integer.parseInt(m.group(2));
-                return;
-            }
-        }
-    }
-
-    private static String titleRegex1 = "^(.+)\\s+[sS][eE][aA][sS][oO][nN]\\s+(\\d+)$";
-    private static String titleRegex2 = "^(.+)\\s+[sS](\\d+)[eE]\\d+$";
-
-    private static Pattern[] titlePatterns =
-        { Pattern.compile(titleRegex1), Pattern.compile(titleRegex2) };
 
     // +----------------+
     // | getRokus       |
