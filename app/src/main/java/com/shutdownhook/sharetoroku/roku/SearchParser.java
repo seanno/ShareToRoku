@@ -7,6 +7,8 @@ import com.shutdownhook.sharetoroku.util.Loggy;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class SearchParser {
 
@@ -35,7 +37,7 @@ public class SearchParser {
             result.Season = checkNull(fields[1]);
             result.Number = checkNull(fields[2]);
 
-            String channelsString = checkNull(fields[3]);
+            String channelsString = (fields.length >= 4 ? checkNull(fields[3]) : null);
             if (channelsString != null) {
                 for (String channelString : channelsString.split(",")) {
                     String[] channelFields = channelString.split(":");
@@ -96,15 +98,11 @@ public class SearchParser {
 
     private static String cleanupForChrome(String input) {
 
-        // chrome puts selected text in quotes and then follows it with the url
-        if (input.startsWith("\"")) {
-            int ichSecondQuote = input.indexOf("\"", 1);
-            if (ichSecondQuote != -1) {
-                return(input.substring(1, ichSecondQuote));
-            }
-        }
-
-        return(input);
+        // chrome puts selected text in quotes and then follows it with the url.
+        // others like the Netflix app do a similar thing that we try to catch
+        // with this pattern
+        Matcher m = CHROME_STYLE_REGEX.matcher(input.replaceAll("\n", " "));
+        return(m.matches() ? m.group(1) : input);
     }
 
     private static String cleanupForTvTime(String input) {
@@ -120,6 +118,10 @@ public class SearchParser {
     // +-------------------+
 
     private static Http http = new Http();
+
+    private static Pattern CHROME_STYLE_REGEX =
+            Pattern.compile("[^\\\"]*\\\"([^\\\"]+)\\\".+[hH][tT][tT][pP].+");
+
 
     private final static Loggy log = new Loggy(SearchParser.class.getName());
 }
