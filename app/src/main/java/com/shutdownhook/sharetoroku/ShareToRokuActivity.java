@@ -5,17 +5,21 @@ import androidx.appcompat.app.AppCompatActivity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.KeyEvent;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.ListView;
+import android.widget.PopupMenu;
 import android.widget.Toast;
 
 import com.shutdownhook.sharetoroku.roku.Roku;
 import com.shutdownhook.sharetoroku.roku.SearchParser;
 import com.shutdownhook.sharetoroku.util.Loggy;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class ShareToRokuActivity extends AppCompatActivity {
@@ -118,7 +122,7 @@ public class ShareToRokuActivity extends AppCompatActivity {
         String userSearch = ((EditText)findViewById(R.id.searchText)).getText().toString();
 
         if (lastParseResult != null && userSearch.equals(lastParseInput)) {
-            sendSearch(lastParseResult, showToast);
+            resolveAndSendSearch(lastParseResult, showToast);
             return;
         }
 
@@ -134,12 +138,12 @@ public class ShareToRokuActivity extends AppCompatActivity {
         // compare against to see if we need to parse again. Sorry about all this.
         lastParseInput = userSearch;
 
-        SearchParser.parse(parseUrlFormat, parseInput, channelsCSV,
+        SearchParser.parse(parseUrlFormat, parseInput, getChannelsCSV(),
                 new SearchParser.ParseResultHandler() {
 
             @Override public void success(SearchParser.ParsedResult result) {
                 lastParseResult = result;
-                sendSearch(result, showToast);
+                resolveAndSendSearch(result, showToast);
             }
             @Override public void error(Exception e) {
                 String msg = getString(R.string.send_failure_parse) + " (" + e.toString() + ")";
@@ -147,13 +151,60 @@ public class ShareToRokuActivity extends AppCompatActivity {
 
                 SearchParser.ParsedResult errResult = new SearchParser.ParsedResult();
                 errResult.Search = userSearch;
-                sendSearch(errResult, showToast);
+                resolveAndSendSearch(errResult, showToast);
             }
         });
     }
 
-    private void sendSearch(SearchParser.ParsedResult parseResult, boolean showToast) {
-        Roku.sendSearch(rokuUrl, parseResult, new Roku.CmdResult() {
+    private void resolveAndSendSearch(SearchParser.ParsedResult parseResult, boolean showToast) {
+
+        final Roku.RokuSearchParams params = new Roku.RokuSearchParams();
+        params.Search = parseResult.Search;
+        params.Season = parseResult.Season;
+
+        if (parseResult.Channels == null || parseResult.Channels.size() == 0) {
+            // no channel
+            sendSearch(params, showToast);
+        }
+        else if (parseResult.Channels.size() == 1) {
+            // exactly one channel
+            params.Channel = parseResult.Channels.get(0).ChannelId;
+            params.ContentId = parseResult.Channels.get(0).ContentId;
+            params.MediaType = parseResult.Channels.get(0).MediaType;
+            sendSearch(params, showToast);
+        }
+        else {
+            // multiple channels --- ask the user to pick
+            PopupMenu menu = new PopupMenu(getApplicationContext(),
+                    findViewById(R.id.searchButton));
+
+            for (int i = 0; i < parseResult.Channels.size(); ++i) {
+                menu.getMenu().add(Menu.NONE, i, Menu.NONE,
+                        getChannelName(parseResult.Channels.get(i).ChannelId));
+            }
+
+            menu.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
+                @Override
+                public boolean onMenuItemClick(MenuItem item) {
+                    SearchParser.ParsedResult.ChannelTarget target =
+                            parseResult.Channels.get(item.getItemId());
+
+                    params.Channel = target.ChannelId;
+                    params.ContentId = target.ContentId;
+                    params.MediaType = target.MediaType;
+
+                    sendSearch(params, showToast);
+                    return(true);
+                }
+            });
+
+            menu.show();
+        }
+    }
+
+    private void sendSearch(Roku.RokuSearchParams params, boolean showToast) {
+
+        Roku.sendSearch(rokuUrl, params, new Roku.CmdResult() {
            @Override public void success() {
                String msg = getString(R.string.send_success);
                log.i("%s", msg); if (showToast) toasty(msg);
@@ -210,10 +261,10 @@ public class ShareToRokuActivity extends AppCompatActivity {
         Roku.getChannels(rokuUrl, new Roku.ChannelsHandler() {
             @Override
             public void handle(List<Roku.ChannelInfo> channels) {
+                channelList = channels;
                 channelAdapter.clear();
                 channelAdapter.addAll(channels);
                 channelAdapter.notifyDataSetChanged();
-                makeChannelsCSV(channels);
                 if (triggerSearch) parseAndSearch(true);
             }
             @Override
@@ -225,18 +276,27 @@ public class ShareToRokuActivity extends AppCompatActivity {
 
     }
 
-    private void makeChannelsCSV(List<Roku.ChannelInfo> channels) {
+    private String getChannelsCSV() {
+
+        if (channelList == null) return("");
 
         StringBuilder sb = new StringBuilder();
 
-        for (Roku.ChannelInfo info : channels) {
+        for (Roku.ChannelInfo info : channelList) {
             if (sb.length() > 0) sb.append(",");
             sb.append(info.ProviderId);
         }
 
-        channelsCSV = sb.toString();
+        return(sb.toString());
     }
 
+    private String getChannelName(String id) {
+        for (Roku.ChannelInfo info : channelList) {
+            if (info.ProviderId.equals(id)) return(info.Name);
+        }
+
+        return(id);
+    }
 
     private void toasty(String msg) {
         Toast toast = Toast.makeText(getApplicationContext(), msg, Toast.LENGTH_SHORT);
@@ -250,7 +310,7 @@ public class ShareToRokuActivity extends AppCompatActivity {
     private String rokuName;
     private String rokuUrl;
     private ArrayAdapter channelAdapter;
-    private String channelsCSV;
+    private List<Roku.ChannelInfo> channelList;
 
     private final static Loggy log = new Loggy(ShareToRokuActivity.class.getName());
 }

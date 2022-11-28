@@ -10,8 +10,8 @@ android {
         minSdk 26
         targetSdk 32
         //noinspection HighAppVersionCode
-        versionCode 2022112301
-        versionName "Release3"
+        versionCode 2022112701
+        versionName "Release4"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }

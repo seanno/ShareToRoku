@@ -9,5 +9,7 @@
     <string name="channels_failure">Failed fetching Roku channels</string>
     <string name="privacy_link"><a href='https://shutdownhook.com/share-to-roku-privacy-and-information/'>privacy and app info</a></string>
     <string name="no_rokus">\nNo Rokus found!\n\nEnsure that wifi and your Roku\nare both turned on\n\nSwipe down to search again\n</string>
-    <string name="parse_url_fmt">https://shutdownapps.duckdns.org:7079/search?input=%s&amp;channels=%s</string>
+    <string name="parse_url_fmt">https://shutdownapps.duckdns.org:7079/search?v=2&amp;input=%s&amp;channels=%s</string>
+<!--    <string name="parse_url_fmt">http://172.26.201.126:7079/search?v=2&amp;input=%s&amp;channels=%s</string> -->
+
 </resources>

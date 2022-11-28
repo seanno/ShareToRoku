@@ -16,8 +16,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 public class Roku {
 
@@ -164,16 +162,25 @@ public class Roku {
     // | sendSearch |
     // +------------+
 
+    public static class RokuSearchParams
+    {
+        public String Search;
+        public String Season;
+        public String Channel;
+        public String ContentId;
+        public String MediaType;
+    }
+
     public static void sendSearch(String baseUrl,
-                                  SearchParser.ParsedResult parsedResult,
+                                  RokuSearchParams params,
                                   CmdResult handler) {
 
-        if (parsedResult.Channel != null && parsedResult.ContentId != null) {
+        if (params.Channel != null && params.ContentId != null) {
 
             sendDeepLink(baseUrl,
-                    parsedResult.Channel,
-                    parsedResult.ContentId,
-                    parsedResult.MediaType,
+                    params.Channel,
+                    params.ContentId,
+                    params.MediaType,
                     handler);
 
             return;
@@ -182,20 +189,20 @@ public class Roku {
         StringBuilder sb = new StringBuilder();
         sb.append(baseUrl).append("search/browse");
 
-        String search = (parsedResult.Search == null ? "" : Http.urlEncode(parsedResult.Search));
+        String search = (params.Search == null ? "" : Http.urlEncode(params.Search));
 
         sb.append("?keyword=").append(search);
 
-        if (parsedResult.Channel != null || parsedResult.Season != null) {
+        if (params.Channel != null || params.Season != null) {
             sb.append("&launch=true&title=").append(search);
         }
 
-        if (parsedResult.Channel != null) {
-            sb.append("&provider-id=").append(Http.urlEncode(parsedResult.Channel));
+        if (params.Channel != null) {
+            sb.append("&provider-id=").append(Http.urlEncode(params.Channel));
         }
 
-        if (parsedResult.Season != null) {
-            sb.append("&type=tv-show&season=").append(Http.urlEncode(parsedResult.Season));
+        if (params.Season != null) {
+            sb.append("&type=tv-show&season=").append(Http.urlEncode(params.Season));
         }
 
         String searchUrl = sb.toString();

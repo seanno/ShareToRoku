@@ -5,6 +5,9 @@ package com.shutdownhook.sharetoroku.roku;
 import com.shutdownhook.sharetoroku.util.Http;
 import com.shutdownhook.sharetoroku.util.Loggy;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class SearchParser {
 
     // +--------------+
@@ -13,12 +16,17 @@ public class SearchParser {
 
     public static class ParsedResult
     {
+        public static class ChannelTarget
+        {
+            public String ChannelId;
+            public String ContentId;
+            public String MediaType;
+        }
+
         public String Search;
         public String Season;
         public String Number;
-        public String Channel;
-        public String ContentId;
-        public String MediaType;
+        public List<ChannelTarget> Channels = new ArrayList<ChannelTarget>();
 
         public static ParsedResult fromString(String input) {
             ParsedResult result = new ParsedResult();
@@ -26,9 +34,19 @@ public class SearchParser {
             result.Search = checkNull(fields[0]);
             result.Season = checkNull(fields[1]);
             result.Number = checkNull(fields[2]);
-            result.Channel = checkNull(fields[3]);
-            result.ContentId = checkNull(fields[4]);
-            result.MediaType = checkNull(fields[5]);
+
+            String channelsString = checkNull(fields[3]);
+            if (channelsString != null) {
+                for (String channelString : channelsString.split(",")) {
+                    String[] channelFields = channelString.split(":");
+                    ChannelTarget target = new ChannelTarget();
+                    target.ChannelId = checkNull(channelFields[0]);
+                    target.ContentId = checkNull(channelFields[1]);
+                    target.MediaType = checkNull(channelFields[2]);
+                    result.Channels.add(target);
+                }
+            }
+
             return(result);
         }
 
