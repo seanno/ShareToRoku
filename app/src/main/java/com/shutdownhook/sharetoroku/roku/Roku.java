@@ -198,7 +198,7 @@ public class Roku {
         }
 
         if (params.Channel != null) {
-            sb.append("&provider-id=").append(Http.urlEncode(params.Channel));
+            sb.append("&match-any=true&provider-id=").append(Http.urlEncode(params.Channel));
         }
 
         if (params.Season != null) {

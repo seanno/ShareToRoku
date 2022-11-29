@@ -92,9 +92,14 @@ public class SearchParser {
         String clean = input.trim();
         clean = cleanupForChrome(clean);
         clean = cleanupForTvTime(clean);
-        return(clean);
+        clean = cleanupUrlSuffix(clean);
+        return(clean.replaceAll("\n", " "));
     }
 
+    private static String cleanupUrlSuffix(String input) {
+        int ichHttp = input.toLowerCase().indexOf("http");
+        return(ichHttp <= 0 ? input : input.substring(0, ichHttp).trim());
+    }
 
     private static String cleanupForChrome(String input) {
 

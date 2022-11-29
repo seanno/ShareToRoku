@@ -179,8 +179,11 @@ public class ShareToRokuActivity extends AppCompatActivity {
                     findViewById(R.id.searchButton));
 
             for (int i = 0; i < parseResult.Channels.size(); ++i) {
-                menu.getMenu().add(Menu.NONE, i, Menu.NONE,
-                        getChannelName(parseResult.Channels.get(i).ChannelId));
+
+                String name = getChannelName(parseResult.Channels.get(i).ChannelId);
+                if (parseResult.Channels.get(i).ContentId != null) name += " *";
+
+                menu.getMenu().add(Menu.NONE, i, Menu.NONE, name);
             }
 
             menu.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
